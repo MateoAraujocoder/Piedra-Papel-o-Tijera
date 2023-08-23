@@ -41,7 +41,8 @@ while (continuarJugando) {
 
     let decision = prompt("¿Quieres jugar de nuevo? (Sí/No)").toLowerCase();
 
-    // Utilizando indexOf() para verificar si la decisión está en "si"
+    /* Utilizo indexOf*/
+    
     if (decision.indexOf("si") !== -1) {
         continuarJugando = true;
     } else {

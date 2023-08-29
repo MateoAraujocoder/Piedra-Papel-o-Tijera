@@ -74,7 +74,7 @@ const jugar = () => {
             let enemigoActual = elegirEnemigoAleatorio();
             let enemy = enemigoActual.ataque;
 
-            alert(` ${enemigoActual.nombre} eligió ${enemigoActual.mostrarAtaque()}`); /* Usando el segundo método personalizado  */
+            alert(` ${enemigoActual.nombre} eligió ${enemigoActual.mostrarAtaque()}`); /* Usando el segundo método personalizado */
 
             if (player === enemy) {
                 alert(mensajes[2]);
@@ -89,12 +89,12 @@ const jugar = () => {
 
         let decision = prompt("¿Quieres jugar de nuevo? (Sí/No)").toLowerCase();
 
-        if (!decision.includes("si")) {
+        if (!decision.indexOf("si") === -1) {
             continuarJugando = false;
         }
     }
 
-    alertMessage("¡Gracias por jugar!");
+    alert("¡Gracias por jugar!");
 };
 
 jugar();

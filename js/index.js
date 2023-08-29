@@ -6,6 +6,21 @@ const mensajes = ["Elegiste", "El enemigo eligió", "Empate ._.", "¡HAS GANADO!
 
 let continuarJugando = true;
 
+/* Personas enemigas */
+const enemigos = [
+    { nombre: "Ana", ataque: Math.floor(Math.random() * 3) },
+    { nombre: "Pepe", ataque: Math.floor(Math.random() * 3) },
+    { nombre: "Juan", ataque: Math.floor(Math.random() * 3) },
+    { nombre: "Mateo", ataque: Math.floor(Math.random() * 3) },
+    { nombre: "Rosa", ataque: Math.floor(Math.random() * 3) }
+];
+
+/* Función para elegir un enemigo aleatorio */
+function elegirEnemigoAleatorio() {
+    const indiceAleatorio = Math.floor(Math.random() * enemigos.length);
+    return enemigos[indiceAleatorio];
+}
+
 /* Inicio del juego */
 
 while (continuarJugando) {
@@ -19,15 +34,17 @@ while (continuarJugando) {
             alert(`${mensajes[0]} ${opciones[player]}`);
         } else {
             alert("Selección inválida. Por favor, elige nuevamente.");
-            i--; 
+            i--;
             /* se le resta 1 al contador para que el jugador repita la elección*/
-
+            
             continue;
         }
 
-        /* Opciones del enemigo (enemy) */
-        let enemy = Math.floor(Math.random() * 3);
-        alert(`${mensajes[1]} ${opciones[enemy]}`);
+        /* Elegir un enemigo aleatorio para esta ronda */
+        let enemigoActual = elegirEnemigoAleatorio();
+        let enemy = enemigoActual.ataque;
+
+        alert(` ${enemigoActual.nombre} eligió ${opciones[enemy]}`);
 
         if (player === enemy) {
             alert(mensajes[2]);
@@ -37,13 +54,11 @@ while (continuarJugando) {
             alert(mensajes[4]);
         }
     }
-    /* Fin del juego */
+    /* Fin de las tres rondas */
 
     let decision = prompt("¿Quieres jugar de nuevo? (Sí/No)").toLowerCase();
 
-    /* Utilizo indexOf*/
-    
-    if (decision.indexOf("si") !== -1) {
+    if (decision.includes("si")) {
         continuarJugando = true;
     } else {
         continuarJugando = false;

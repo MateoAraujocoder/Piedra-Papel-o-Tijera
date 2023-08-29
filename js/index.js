@@ -1,5 +1,27 @@
 alert("¡Bienvenido jugador!");
 
+/* Constructores */
+function Jugador(nombre) {
+    this.nombre = nombre;
+    this.partidasGanadas = 0;
+
+    this.incrementarPartidasGanadas = function() {
+        this.partidasGanadas++;
+    };
+}
+
+function Enemigo(nombre) {
+    this.nombre = nombre;
+    this.ataque = Math.floor(Math.random() * 3);
+
+    this.mostrarAtaque = function() {
+        return opciones[this.ataque];
+    };
+}
+
+const alertMessage = message => alert(message);
+const promptInput = message => parseInt(prompt(message));
+
 /* Objetos */
 const opciones = ["piedra", "papel", "tijera"];
 const mensajes = ["Elegiste", "El enemigo eligió", "Empate ._.", "¡HAS GANADO! :)", "Perdiste :("];
@@ -7,62 +29,72 @@ const mensajes = ["Elegiste", "El enemigo eligió", "Empate ._.", "¡HAS GANADO!
 let continuarJugando = true;
 
 /* Personas enemigas */
-const enemigos = [
-    { nombre: "Ana", ataque: Math.floor(Math.random() * 3) },
-    { nombre: "Pepe", ataque: Math.floor(Math.random() * 3) },
-    { nombre: "Juan", ataque: Math.floor(Math.random() * 3) },
-    { nombre: "Mateo", ataque: Math.floor(Math.random() * 3) },
-    { nombre: "Rosa", ataque: Math.floor(Math.random() * 3) }
+const enemy = [
+    new Enemigo("Ana"),
+    new Enemigo("Facundo"),
+    new Enemigo("Juan"),
+    new Enemigo("Franco"),
+    new Enemigo("Rosa")
 ];
 
-/* Función para elegir un enemigo aleatorio */
-function elegirEnemigoAleatorio() {
-    const indiceAleatorio = Math.floor(Math.random() * enemigos.length);
-    return enemigos[indiceAleatorio];
-}
+const elegirEnemigoAleatorio = () => {
+    const indiceAleatorio = Math.floor(Math.random() * enemy.length);
+    return enemy[indiceAleatorio];
+};
 
 /* Inicio del juego */
+const obtenerEntrada = mensaje => promptInput(mensaje);
 
-while (continuarJugando) {
+const mostrarResultado = (mensaje, jugadorGana) => {
+    alert(mensaje);
+    if (jugadorGana) {
+        jugador.incrementarPartidasGanadas(); /* Usando el método personalizado*/
+    }
+};
 
-    for (let i = 0; i < 3; i++) {
-        alert("Elige tu ataque:");
+const jugadorNombre = prompt("Ingresa tu nombre:");
+const jugador = new Jugador(jugadorNombre);
 
-        let player = parseInt(prompt("Escribe 0 para piedra, 1 para papel y 2 para tijera"));
+const jugar = () => {
+    while (continuarJugando) {
+        for (let i = 0; i < 3; i++) {
+            alert("Elige tu ataque:");
 
-        if (player >= 0 && player <= 2) {
-            alert(`${mensajes[0]} ${opciones[player]}`);
-        } else {
-            alert("Selección inválida. Por favor, elige nuevamente.");
-            i--;
-            /* se le resta 1 al contador para que el jugador repita la elección*/
-            
-            continue;
+            let player = obtenerEntrada("Escribe 0 para piedra, 1 para papel y 2 para tijera");
+
+            if (player >= 0 && player <= 2) {
+                alert(`${mensajes[0]} ${opciones[player]}`);
+            } else {
+                alert("Selección inválida. Por favor, elige nuevamente.");
+                i--;
+
+                continue;
+            }
+
+            let enemigoActual = elegirEnemigoAleatorio();
+            let enemy = enemigoActual.ataque;
+
+            alert(` ${enemigoActual.nombre} eligió ${enemigoActual.mostrarAtaque()}`); /* Usando el segundo método personalizado  */
+
+            if (player === enemy) {
+                alert(mensajes[2]);
+            } else if ((player === 0 && enemy === 2) || (player === 1 && enemy === 0) || (player === 2 && enemy === 1)) {
+                mostrarResultado(mensajes[3], true);
+            } else {
+                mostrarResultado(mensajes[4], false);
+            }
         }
 
-        /* Elegir un enemigo aleatorio para esta ronda */
-        let enemigoActual = elegirEnemigoAleatorio();
-        let enemy = enemigoActual.ataque;
+        alert(`Has ganado ${jugador.partidasGanadas} partidas.`);
 
-        alert(` ${enemigoActual.nombre} eligió ${opciones[enemy]}`);
+        let decision = prompt("¿Quieres jugar de nuevo? (Sí/No)").toLowerCase();
 
-        if (player === enemy) {
-            alert(mensajes[2]);
-        } else if ((player === 0 && enemy === 2) || (player === 1 && enemy === 0) || (player === 2 && enemy === 1)) {
-            alert(mensajes[3]);
-        } else {
-            alert(mensajes[4]);
+        if (!decision.includes("si")) {
+            continuarJugando = false;
         }
     }
-    /* Fin de las tres rondas */
 
-    let decision = prompt("¿Quieres jugar de nuevo? (Sí/No)").toLowerCase();
+    alertMessage("¡Gracias por jugar!");
+};
 
-    if (decision.includes("si")) {
-        continuarJugando = true;
-    } else {
-        continuarJugando = false;
-    }
-}
-
-alert("¡Gracias por jugar!");
+jugar();

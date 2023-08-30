@@ -89,9 +89,9 @@ const jugar = () => {
 
         let decision = prompt("¿Quieres jugar de nuevo? (Sí/No)").toLowerCase();
 
-        if (!decision.indexOf("si") === -1) {
-            continuarJugando = false;
-        }
+        if (decision.indexOf("no") !== -1) {
+    continuarJugando = false;
+}
     }
 
     alert("¡Gracias por jugar!");

@@ -1,22 +1,29 @@
-alert("¡Bienvenido jugador!");
-
+alert ("Bienvenido jugador")
 /* Constructores */
-function Jugador(nombre) {
-    this.nombre = nombre;
-    this.partidasGanadas = 0;
+class Jugador {
+    constructor(nombre) {
+        this.nombre = nombre;
+        this.partidasGanadas = 0;
 
-    this.incrementarPartidasGanadas = function() {
-        this.partidasGanadas++;
-    };
+        this.incrementarPartidasGanadas = function () {
+            this.partidasGanadas++;
+        };
+    }
 }
 
-function Enemigo(nombre) {
-    this.nombre = nombre;
-    this.ataque = Math.floor(Math.random() * 3);
+class Enemigo {
+    constructor(nombre) {
+        this.nombre = nombre;
+        this.ataque = Math.floor(Math.random() * 3);
 
-    this.mostrarAtaque = function() {
-        return opciones[this.ataque];
-    };
+        this.mostrarAtaque = function () {
+            return opciones[this.ataque];
+        };
+    }
+
+    static buscarEnemigoPorNombre(nombre) {
+        return enemy.find(enemigo => enemigo.nombre.toLowerCase() === nombre.toLowerCase());
+    }
 }
 
 const alertMessage = message => alert(message);
@@ -40,6 +47,22 @@ const enemy = [
 const elegirEnemigoAleatorio = () => {
     const indiceAleatorio = Math.floor(Math.random() * enemy.length);
     return enemy[indiceAleatorio];
+};
+
+const mostrarNombresEnemigos = () => {
+    const nombresEnemigos = enemy.map(enemigo => enemigo.nombre).join(', ');
+    alert(`Nombres de enemigos disponibles: ${nombresEnemigos}`);
+};
+
+
+const obtenerNombreEnemigo = () => {
+    mostrarNombresEnemigos();
+    let nombreEnemigoElegido = prompt("Elige el nombre de un enemigo para enfrentar:").trim();
+    while (!enemy.some(enemigo => enemigo.nombre.toLowerCase() === nombreEnemigoElegido.toLowerCase())) {
+        alert(`No se encontró ningún enemigo con el nombre ${nombreEnemigoElegido}.`);
+        nombreEnemigoElegido = prompt("Por favor, elige un nombre válido de enemigo:").trim();
+    }
+    return nombreEnemigoElegido;
 };
 
 /* Inicio del juego */
@@ -71,14 +94,14 @@ const jugar = () => {
                 continue;
             }
 
-            let enemigoActual = elegirEnemigoAleatorio();
-            let enemy = enemigoActual.ataque;
+            let nombreEnemigoElegido = obtenerNombreEnemigo();
+            let enemigoElegido = Enemigo.buscarEnemigoPorNombre(nombreEnemigoElegido);
 
-            alert(` ${enemigoActual.nombre} eligió ${enemigoActual.mostrarAtaque()}`); /* Usando el segundo método personalizado */
+            alert(` ${enemigoElegido.nombre} eligió ${enemigoElegido.mostrarAtaque()}`);
 
-            if (player === enemy) {
+            if (player === enemigoElegido.ataque) {
                 alert(mensajes[2]);
-            } else if ((player === 0 && enemy === 2) || (player === 1 && enemy === 0) || (player === 2 && enemy === 1)) {
+            } else if ((player === 0 && enemigoElegido.ataque === 2) || (player === 1 && enemigoElegido.ataque === 0) || (player === 2 && enemigoElegido.ataque === 1)) {
                 mostrarResultado(mensajes[3], true);
             } else {
                 mostrarResultado(mensajes[4], false);
@@ -90,8 +113,8 @@ const jugar = () => {
         let decision = prompt("¿Quieres jugar de nuevo? (Sí/No)").toLowerCase();
 
         if (decision.indexOf("no") !== -1) {
-    continuarJugando = false;
-}
+            continuarJugando = false;
+        }
     }
 
     alert("¡Gracias por jugar!");

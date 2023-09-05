@@ -1,9 +1,20 @@
+
 h1{
 display: flex;
 justify-content: center;
 color: white;
 background-color: black;
 font-family:'Montserrat', sans-serif;
+margin-bottom: 245px;
 
+}
+
+#iniciarJuego{
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    color: black;
+    background-color: blueviolet;
+    height: 30px;
 
 }

@@ -1,3 +1,8 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f0f0f0;
+}
 
 h1{
 display: flex;
@@ -17,4 +22,24 @@ margin-bottom: 245px;
     background-color: blueviolet;
     height: 30px;
 
+}
+
+
+#mensaje, #resultado {
+    margin: 10px 0;
+    padding: 10px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+}
+
+#botones {
+    display: flex;
+    justify-content: center;
+}
+
+button {
+    margin: 0 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
 }

@@ -1,9 +1,89 @@
-h1{
-display: flex;
-justify-content: center;
-color: white;
-background-color: black;
-font-family:'Montserrat', sans-serif;
+/* Estilo global */
+body {
+    background-color: #000;
+    color: #fff;
+    font-family: 'Montserrat', sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    transition: background-color 1s ease; /* Transición suave del color de fondo */
+}
 
+/* Estilo de la luz azul */
+#light {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, transparent 0%, rgba(0, 123, 255, 0.5) 80%); /* Color azul difuminado */
+    animation: fadeOut 5s linear infinite, fadeIn 5s linear infinite; /* Animación para que la luz se desvanezca y aparezca */
+    pointer-events: none;
+    opacity: 0; /* Inicialmente oculto */
+}
 
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+/* Estilo del contenido */
+.content {
+    z-index: 1;
+    padding: 20px;
+}
+
+/* Encabezado */
+h1 {
+    font-size: 36px;
+    margin-top: 20px;
+}
+
+/* Subtítulo */
+h2 {
+    font-size: 24px;
+    margin-top: 10px;
+}
+
+/* Botones */
+button {
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 18px;
+    margin-top: 10px;
+    cursor: pointer;
+    transition: background-color 0.5s ease; /* Transición suave del color de fondo del botón */
+}
+
+button:hover {
+    background-color: #0056b3; /* Color de fondo más claro al pasar el mouse */
+}
+
+/* Contenedores */
+#mensajesContainer, #resultadosContainer {
+    background-color: #333;
+    color: #fff;
+    padding: 10px;
+    margin-top: 10px;
+}
+
+/* Botón Reiniciar */
+#reiniciarBtn {
+    background-color: #ff0;
+    color: #000;
+    margin-top: 20px;
 }

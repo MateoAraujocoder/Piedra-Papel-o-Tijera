@@ -190,6 +190,19 @@ document.addEventListener("DOMContentLoaded", function () {
             resultadosContainer.innerHTML = "";
             rondasJugadas = 0;
             reiniciarBtn.style.display = "none";
+
+            // Personaliza el mensaje emergente utilizando Swal.fire
+            Swal.fire({
+                title: 'Juego reiniciado',
+                text: 'El juego ha sido reiniciado con éxito.',
+                icon: 'success', // Cambia el icono a uno de éxito (puedes cambiarlo según tus necesidades)
+                confirmButtonText: 'Aceptar', // Cambia el texto del botón de confirmación
+                customClass: {
+                    confirmButton: 'swal-confirm-button', // Clase CSS personalizada para el botón de confirmación
+                    container: 'swal-container', // Clase CSS personalizada para el contenedor del mensaje emergente
+                },
+                // Aquí puedes agregar más opciones de estilo según tus preferencias
+            });
         });
 
         function determinarResultado(jugador, enemigo) {
@@ -199,7 +212,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 return 3; // Jugador gana
             } else {
                 return 4; // Jugador pierde
-            }
+      }
         }
     });
 });
+

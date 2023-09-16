@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", function () {
         let opciones;
         let enemigos;
 
-        // Cargar datos desde el archivo JSON a través del enlace
+        /*Cargar datos desde el archivo JSON a través del enlace*/
         try {
             const link = document.querySelector('link[rel="json"]');
             const response = await fetch(link.href);
@@ -95,7 +95,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 localStorage.setItem('nombres', JSON.stringify(nombresGuardados));
             }
 
-            // Restablece las partidas ganadas en 0 al inicio del juego
+            /*Restablece las partidas ganadas en 0 al inicio del juego*/
             jugador.partidasGanadas = 0;
 
             mostrarNombresEnemigos();
@@ -125,65 +125,73 @@ document.addEventListener("DOMContentLoaded", function () {
             };
 
             const jugar = async () => {
-                let rondasJugadas = 0;
-                while (rondasJugadas < 3) {
-                    rondasJugadas++;
+                return new Promise(async (resolve, reject) => {
+                    let rondasJugadas = 0;
+                    while (rondasJugadas < 3) {
+                        rondasJugadas++;
 
-                    // Limpia el contenido del contenedor de mensajes antes de cada ronda
-                    limpiarMensajes();
-
-                    const ataqueMensaje = document.createElement("p");
-                    ataqueMensaje.textContent = "Ronda " + rondasJugadas + ": Elige tu ataque:";
-                    mensajesContainer.appendChild(ataqueMensaje);
-
-                    const player = await obtenerEntrada("Escribe 0 para piedra, 1 para papel y 2 para tijera:");
-
-                    if (player >= 0 && player <= 2) {
-                        const eleccionMensaje = document.createElement("p");
-                        eleccionMensaje.textContent = `${opciones[player]}`;
-                        mensajesContainer.appendChild(eleccionMensaje);
-
-                        const enemigoAtaque = enemigo.ataque;
-                        const enemigoAtaqueMensaje = document.createElement("p");
-                        enemigoAtaqueMensaje.textContent = `${enemigo.nombre} eligió ${opciones[enemigoAtaque]}`;
-                        mensajesContainer.appendChild(enemigoAtaqueMensaje);
-
-                        const resultado = determinarResultado(player, enemigoAtaque);
-
-                        /* Muestra el mensaje de resultado debajo del mensaje del ataque del enemigo */
-                        const resultadoMensaje = document.createElement("p");
-                        resultadoMensaje.textContent = resultado === 2 ? "Empate ._."
-                            : resultado === 3 ? "¡HAS GANADO! :)"
-                            : "Perdiste :(";
-                        mensajesContainer.appendChild(resultadoMensaje);
-
-                        // Si el resultado es una victoria, incrementa las partidas ganadas del jugador
-                        if (resultado === 3) {
-                            jugador.incrementarPartidasGanadas();
-                        }
-
-                        // Agrega un botón para continuar a la siguiente ronda
-                        const continuarBtn = document.createElement("button");
-                        continuarBtn.textContent = "Continuar";
-                        mensajesContainer.appendChild(continuarBtn);
-
-                        // Espera a que el jugador presione el botón para continuar
-                        await new Promise(resolve => {
-                            continuarBtn.addEventListener("click", () => {
-                                resolve();
-                            });
-                        });
-
-                        // Limpia el contenido del contenedor de mensajes antes de la siguiente ronda
+                        /*Limpia el contenido del contenedor de mensajes antes de cada ronda*/
                         limpiarMensajes();
-                    } else {
-                        const seleccionInvalidaMensaje = document.createElement("p");
-                        seleccionInvalidaMensaje.textContent = "Selección inválida. Por favor, elige nuevamente.";
-                        mensajesContainer.appendChild(seleccionInvalidaMensaje);
-                        rondasJugadas--; // Resta una ronda para que se repita la actual.
-                    }
-                }
 
+                        const ataqueMensaje = document.createElement("p");
+                        ataqueMensaje.textContent = "Ronda " + rondasJugadas + ": Elige tu ataque:";
+                        mensajesContainer.appendChild(ataqueMensaje);
+
+                        try {
+                            const player = await obtenerEntrada("Escribe 0 para piedra, 1 para papel y 2 para tijera:");
+
+                            if (player >= 0 && player <= 2) {
+                                const eleccionMensaje = document.createElement("p");
+                                eleccionMensaje.textContent = `${opciones[player]}`;
+                                mensajesContainer.appendChild(eleccionMensaje);
+
+                                const enemigoAtaque = enemigo.ataque;
+                                const enemigoAtaqueMensaje = document.createElement("p");
+                                enemigoAtaqueMensaje.textContent = `${enemigo.nombre} eligió ${opciones[enemigoAtaque]}`;
+                                mensajesContainer.appendChild(enemigoAtaqueMensaje);
+
+                                const resultado = determinarResultado(player, enemigoAtaque);
+
+                                /* Muestra el mensaje de resultado debajo del mensaje del ataque del enemigo */
+                                const resultadoMensaje = document.createElement("p");
+                                resultadoMensaje.textContent = resultado === 2 ? "Empate ._."
+                                    : resultado === 3 ? "¡HAS GANADO! :)"
+                                    : "Perdiste :(";
+                                mensajesContainer.appendChild(resultadoMensaje);
+
+                                /*Si el resultado es una victoria, incrementa las partidas ganadas del jugador*/
+                                if (resultado === 3) {
+                                    jugador.incrementarPartidasGanadas();
+                                }
+
+                                /*Botón para continuar a la siguiente ronda*/
+                                const continuarBtn = document.createElement("button");
+                                continuarBtn.textContent = "Continuar";
+                                mensajesContainer.appendChild(continuarBtn);
+
+                                await new Promise(resolve => {
+                                    continuarBtn.addEventListener("click", () => {
+                                        resolve();
+                                    });
+                                });
+
+                                /*Limpia el contenido del contenedor de mensajes antes de la siguiente ronda*/
+                                limpiarMensajes();
+                            } else {
+                                const seleccionInvalidaMensaje = document.createElement("p");
+                                seleccionInvalidaMensaje.textContent = "Selección inválida. Por favor, elige nuevamente.";
+                                mensajesContainer.appendChild(seleccionInvalidaMensaje);
+                                rondasJugadas--; /*Resta una ronda para que se repita la actual*/
+                            }
+                        } catch (error) {
+                            reject(error);
+                        }
+                    }
+                    resolve();
+                });
+            };
+
+            jugar().then(() => {
                 const partidasGanadasMensaje = document.createElement("p");
                 partidasGanadasMensaje.textContent = `Has ganado ${jugador.partidasGanadas} partidas.`;
                 resultadosContainer.appendChild(partidasGanadasMensaje);
@@ -193,9 +201,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 /* Mostrar el botón para reiniciar */
                 reiniciarBtn.style.display = "block";
-            };
-
-            jugar();
+            }).catch(error => {
+                console.error("Error en el juego:", error);
+            });
         });
 
         reiniciarBtn.addEventListener("click", function () {

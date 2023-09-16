@@ -1,0 +1,26 @@
+{
+    "opciones": ["piedra", "papel", "tijera"],
+    "enemigos": [
+      {
+        "nombre": "Ana",
+        "ataque": 1
+      },
+      {
+        "nombre": "Facundo",
+        "ataque": 2
+      },
+      {
+        "nombre": "Juan",
+        "ataque": 0
+      },
+      {
+        "nombre": "Franco",
+        "ataque": 1
+      },
+      {
+        "nombre": "Rosa",
+        "ataque": 2
+      }
+    ]
+  }
+  

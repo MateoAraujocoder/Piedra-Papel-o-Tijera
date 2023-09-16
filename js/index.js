@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const resultadosContainer = document.getElementById("resultadosContainer");
     const reiniciarBtn = document.getElementById("reiniciarBtn");
 
-    iniciarJuegoBtn.addEventListener("click", function () {
+    iniciarJuegoBtn.addEventListener("click", async function () {
         mensajesContainer.innerHTML = "¡Bienvenido jugador!<br>";
 
         class Jugador {
@@ -19,9 +19,9 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         class Enemigo {
-            constructor(nombre) {
+            constructor(nombre, ataque) {
                 this.nombre = nombre;
-                this.ataque = Math.floor(Math.random() * 3);
+                this.ataque = ataque;
 
                 this.mostrarAtaque = function () {
                     return opciones[this.ataque];
@@ -29,54 +29,30 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             static buscarEnemigoPorNombre(nombre) {
-                return enemy.find(enemigo => enemigo.nombre.toLowerCase() === nombre.toLowerCase());
+                return enemigos.find(enemigo => enemigo.nombre.toLowerCase() === nombre.toLowerCase());
             }
         }
 
-        const opciones = ["piedra", "papel", "tijera"];
-        const mensajes = ["Elegiste", "El enemigo eligió", "Empate ._.", "¡HAS GANADO! :)", "Perdiste :("];
-        let rondasJugadas = 0;
+        let opciones;
+        let enemigos;
 
-        const enemy = [
-            new Enemigo("Ana"),
-            new Enemigo("Facundo"),
-            new Enemigo("Juan"),
-            new Enemigo("Franco"),
-            new Enemigo("Rosa")
-        ];
-
-        const elegirEnemigoAleatorio = () => {
-            const indiceAleatorio = Math.floor(Math.random() * enemy.length);
-            return enemy[indiceAleatorio];
-        };
+        // Cargar datos desde el archivo JSON a través del enlace
+        try {
+            const link = document.querySelector('link[rel="json"]');
+            const response = await fetch(link.href);
+            const data = await response.json();
+            opciones = data.opciones;
+            enemigos = data.enemigos.map(enemigo => new Enemigo(enemigo.nombre, enemigo.ataque));
+        } catch (error) {
+            console.error('Error al cargar los datos desde el archivo JSON:', error);
+            return;
+        }
 
         const mostrarNombresEnemigos = () => {
-            const nombresEnemigos = enemy.map(enemigo => enemigo.nombre).join(', ');
+            const nombresEnemigos = enemigos.map(enemigo => enemigo.nombre).join(', ');
             const nombresEnemigosMensaje = document.createElement("p");
             nombresEnemigosMensaje.textContent = `Nombres de enemigos disponibles: ${nombresEnemigos}`;
             mensajesContainer.appendChild(nombresEnemigosMensaje);
-        };
-
-        const obtenerNombreEnemigo = () => {
-            mostrarNombresEnemigos();
-
-            const nombreEnemigoInput = document.createElement("input");
-            nombreEnemigoInput.type = "text";
-            nombreEnemigoInput.placeholder = "Elige el nombre de un enemigo para enfrentar:";
-            mensajesContainer.appendChild(nombreEnemigoInput);
-
-            return new Promise(resolve => {
-                nombreEnemigoInput.addEventListener("change", function () {
-                    let nombreEnemigoElegido = nombreEnemigoInput.value.trim();
-                    while (!enemy.some(enemigo => enemigo.nombre.toLowerCase() === nombreEnemigoElegido.toLowerCase())) {
-                        const noEncontradoMensaje = document.createElement("p");
-                        noEncontradoMensaje.textContent = `No se encontró ningún enemigo con el nombre ${nombreEnemigoElegido}.`;
-                        mensajesContainer.appendChild(noEncontradoMensaje);
-                        nombreEnemigoElegido = nombreEnemigoInput.value.trim();
-                    }
-                    resolve(nombreEnemigoElegido);
-                });
-            });
         };
 
         const obtenerEntrada = mensaje => {
@@ -92,16 +68,6 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         };
 
-        const mostrarResultado = (jugadorGana) => {
-            if (jugadorGana) {
-                jugador.incrementarPartidasGanadas();
-            }
-
-            const resultadoMensaje = document.createElement("p");
-            resultadoMensaje.textContent = mensajes[jugadorGana ? 3 : 4];
-            mensajesContainer.appendChild(resultadoMensaje);
-        };
-
         const jugadorNombreInput = document.createElement("input");
         jugadorNombreInput.type = "text";
         jugadorNombreInput.placeholder = "Ingresa tu nombre:";
@@ -110,29 +76,61 @@ document.addEventListener("DOMContentLoaded", function () {
         jugadorNombreInput.addEventListener("change", async function () {
             const jugadorNombre = jugadorNombreInput.value;
 
-            // Obtener todos los nombres y progresos almacenados en el localStorage
+            /*Obtener todos los nombres y progresos almacenados en el localStorage*/
             const nombresGuardados = JSON.parse(localStorage.getItem('nombres')) || [];
-            const partidasGanadasGuardadas = localStorage.getItem('partidasGanadas');
 
             let jugador;
 
-            // Buscar si el nombre ya está en la lista de nombres guardados
+            /* Buscar si el nombre ya está en la lista de nombres guardados*/
             const jugadorGuardado = nombresGuardados.find(entry => entry.nombre === jugadorNombre);
 
             if (jugadorGuardado) {
-                // Si el nombre ya existe, usar el progreso almacenado
+                /* Si el nombre ya existe, usar el progreso almacenado*/
                 jugador = new Jugador(jugadorGuardado.nombre);
                 jugador.partidasGanadas = parseInt(jugadorGuardado.partidasGanadas);
             } else {
-                // Si es un nuevo nombre, crear un nuevo jugador
+                /* Si es un nuevo nombre, crear un nuevo jugador*/
                 jugador = new Jugador(jugadorNombre);
-                nombresGuardados.push({ nombre: jugador.nombre, partidasGanadas: jugador.partidasGanadas });
+                nombresGuardados.push({ nombre: jugador.nombre, partidasGanadas: 0 }); // Inicializa en 0
                 localStorage.setItem('nombres', JSON.stringify(nombresGuardados));
             }
 
+            // Restablece las partidas ganadas en 0 al inicio del juego
+            jugador.partidasGanadas = 0;
+
+            mostrarNombresEnemigos();
+
+            const nombreEnemigoInput = document.createElement("input");
+            nombreEnemigoInput.type = "text";
+            nombreEnemigoInput.placeholder = "Elige el nombre de un enemigo para enfrentar:";
+            mensajesContainer.appendChild(nombreEnemigoInput);
+
+            const nombreEnemigoElegido = await new Promise(resolve => {
+                nombreEnemigoInput.addEventListener("change", function () {
+                    let nombreEnemigoElegido = nombreEnemigoInput.value.trim();
+                    while (!enemigos.some(enemigo => enemigo.nombre.toLowerCase() === nombreEnemigoElegido.toLowerCase())) {
+                        const noEncontradoMensaje = document.createElement("p");
+                        noEncontradoMensaje.textContent = `No se encontró ningún enemigo con el nombre ${nombreEnemigoElegido}.`;
+                        mensajesContainer.appendChild(noEncontradoMensaje);
+                        nombreEnemigoElegido = nombreEnemigoInput.value.trim();
+                    }
+                    resolve(nombreEnemigoElegido);
+                });
+            });
+
+            const enemigo = Enemigo.buscarEnemigoPorNombre(nombreEnemigoElegido);
+
+            const limpiarMensajes = () => {
+                mensajesContainer.innerHTML = "";
+            };
+
             const jugar = async () => {
+                let rondasJugadas = 0;
                 while (rondasJugadas < 3) {
                     rondasJugadas++;
+
+                    // Limpia el contenido del contenedor de mensajes antes de cada ronda
+                    limpiarMensajes();
 
                     const ataqueMensaje = document.createElement("p");
                     ataqueMensaje.textContent = "Ronda " + rondasJugadas + ": Elige tu ataque:";
@@ -142,11 +140,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
                     if (player >= 0 && player <= 2) {
                         const eleccionMensaje = document.createElement("p");
-                        eleccionMensaje.textContent = `${mensajes[0]} ${opciones[player]}`;
+                        eleccionMensaje.textContent = `${opciones[player]}`;
                         mensajesContainer.appendChild(eleccionMensaje);
-
-                        const nombreEnemigoElegido = await obtenerNombreEnemigo();
-                        const enemigo = Enemigo.buscarEnemigoPorNombre(nombreEnemigoElegido);
 
                         const enemigoAtaque = enemigo.ataque;
                         const enemigoAtaqueMensaje = document.createElement("p");
@@ -155,13 +150,32 @@ document.addEventListener("DOMContentLoaded", function () {
 
                         const resultado = determinarResultado(player, enemigoAtaque);
 
-                        // Muestra el mensaje de resultado debajo del mensaje del ataque del enemigo
+                        /* Muestra el mensaje de resultado debajo del mensaje del ataque del enemigo */
                         const resultadoMensaje = document.createElement("p");
-                        resultadoMensaje.textContent = mensajes[resultado];
+                        resultadoMensaje.textContent = resultado === 2 ? "Empate ._."
+                            : resultado === 3 ? "¡HAS GANADO! :)"
+                            : "Perdiste :(";
                         mensajesContainer.appendChild(resultadoMensaje);
 
-                        // Pausa para mostrar el resultado antes de la siguiente ronda
-                        await new Promise(resolve => setTimeout(resolve, 1000));
+                        // Si el resultado es una victoria, incrementa las partidas ganadas del jugador
+                        if (resultado === 3) {
+                            jugador.incrementarPartidasGanadas();
+                        }
+
+                        // Agrega un botón para continuar a la siguiente ronda
+                        const continuarBtn = document.createElement("button");
+                        continuarBtn.textContent = "Continuar";
+                        mensajesContainer.appendChild(continuarBtn);
+
+                        // Espera a que el jugador presione el botón para continuar
+                        await new Promise(resolve => {
+                            continuarBtn.addEventListener("click", () => {
+                                resolve();
+                            });
+                        });
+
+                        // Limpia el contenido del contenedor de mensajes antes de la siguiente ronda
+                        limpiarMensajes();
                     } else {
                         const seleccionInvalidaMensaje = document.createElement("p");
                         seleccionInvalidaMensaje.textContent = "Selección inválida. Por favor, elige nuevamente.";
@@ -177,7 +191,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 localStorage.setItem('nombres', JSON.stringify(nombresGuardados));
                 localStorage.setItem('partidasGanadas', jugador.partidasGanadas.toString());
 
-                // Mostrar el botón para reiniciar
+                /* Mostrar el botón para reiniciar */
                 reiniciarBtn.style.display = "block";
             };
 
@@ -185,23 +199,21 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         reiniciarBtn.addEventListener("click", function () {
-            // Limpia los mensajes y resultados para reiniciar el juego
+            /* Limpia los mensajes y resultados para reiniciar el juego */
             mensajesContainer.innerHTML = "";
             resultadosContainer.innerHTML = "";
-            rondasJugadas = 0;
             reiniciarBtn.style.display = "none";
 
-            // Personaliza el mensaje emergente utilizando Swal.fire
+            /* Personaliza el mensaje emergente utilizando Swal.fire */
             Swal.fire({
                 title: 'Juego reiniciado',
                 text: 'El juego ha sido reiniciado con éxito.',
-                icon: 'success', // Cambia el icono a uno de éxito (puedes cambiarlo según tus necesidades)
-                confirmButtonText: 'Aceptar', // Cambia el texto del botón de confirmación
+                icon: 'success',
+                confirmButtonText: 'Aceptar',
                 customClass: {
-                    confirmButton: 'swal-confirm-button', // Clase CSS personalizada para el botón de confirmación
-                    container: 'swal-container', // Clase CSS personalizada para el contenedor del mensaje emergente
+                    confirmButton: 'swal-confirm-button',
+                    container: 'swal-container',
                 },
-                // Aquí puedes agregar más opciones de estilo según tus preferencias
             });
         });
 
@@ -212,8 +224,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 return 3; // Jugador gana
             } else {
                 return 4; // Jugador pierde
-      }
+            }
         }
     });
 });
-
